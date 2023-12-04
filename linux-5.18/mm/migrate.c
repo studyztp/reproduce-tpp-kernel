@@ -241,7 +241,7 @@ static bool remove_migration_pte(struct folio *folio,
 #endif
 		{
 #ifdef CONFIG_NUMA_BALANCING
-			if (page_is_demoted(page) && vma_migratable(vma)) {
+			if (page_is_demoted(new) && vma_migratable(vma)) {
 				bool writable = pte_write(pte);
 
 				pte = pte_modify(pte, PAGE_NONE);

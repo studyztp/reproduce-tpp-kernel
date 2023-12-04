@@ -23,7 +23,7 @@ enum page_ext_flags {
 	PAGE_EXT_YOUNG,
 	PAGE_EXT_IDLE,
 #endif
-#if defined(CONFIG_NUMA_BALANCING) && !defined(CONFIG_64BIT)
+#if defined(CONFIG_NUMA_BALANCING)
 	PAGE_EXT_DEMOTED,
 #endif
 };

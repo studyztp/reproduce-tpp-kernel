@@ -6,9 +6,10 @@
  * This is the interface between the scheduler and the MM that
  * implements memory access pattern based NUMA-balancing:
  */
-
+#include <linux/bitops.h>
 #include <linux/sched.h>
 #include <linux/page-flags.h>
+#include <linux/page_ext.h>
 
 #define TNF_MIGRATED	0x01
 #define TNF_NO_GROUP	0x02
@@ -43,9 +44,9 @@ static inline void set_page_demoted(struct page *page)
 	struct page_ext *page_ext = lookup_page_ext(page);
 
 	if (unlikely(!page_ext))
-		return false;
+		return;
 
-	return set_bit(PAGE_EXT_DEMOTED, &page_ext->flags);
+	set_bit(PAGE_EXT_DEMOTED, &page_ext->flags);
 }
 
 static inline bool test_and_clear_page_demoted(struct page *page)

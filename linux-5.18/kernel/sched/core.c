@@ -4376,11 +4376,12 @@ static void __set_numabalancing_state(bool enabled)
 
 void set_numabalancing_state(bool enabled)
 {
-	if (enabled)
+	if (enabled) {
 		sysctl_numa_balancing_mode = NUMA_BALANCING_NORMAL;
 		numa_promotion_tiered_enabled = true;
-	else
+	} else {
 		sysctl_numa_balancing_mode = NUMA_BALANCING_DISABLED;
+	}
 	__set_numabalancing_state(enabled);
 }
 
