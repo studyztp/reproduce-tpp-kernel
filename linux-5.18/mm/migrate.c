@@ -50,6 +50,7 @@
 #include <linux/memory.h>
 #include <linux/random.h>
 #include <linux/sched/sysctl.h>
+#include <linux/sched/numa_balancing.h>
 
 #include <asm/tlbflush.h>
 
@@ -239,6 +240,15 @@ static bool remove_migration_pte(struct folio *folio,
 		} else
 #endif
 		{
+#ifdef CONFIG_NUMA_BALANCING
+			if (page_is_demoted(page) && vma_migratable(vma)) {
+				bool writable = pte_write(pte);
+
+				pte = pte_modify(pte, PAGE_NONE);
+				if (writable)
+					pte = pte_mk_savedwrite(pte);
+			}
+#endif
 			if (folio_test_anon(folio))
 				page_add_anon_rmap(new, vma, pvmw.address, false);
 			else

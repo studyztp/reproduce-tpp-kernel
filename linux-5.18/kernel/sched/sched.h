@@ -47,6 +47,7 @@
 #include <linux/mutex_api.h>
 #include <linux/plist.h>
 #include <linux/poll.h>
+#include <linux/mm_inline.h>
 #include <linux/proc_fs.h>
 #include <linux/profile.h>
 #include <linux/psi.h>
