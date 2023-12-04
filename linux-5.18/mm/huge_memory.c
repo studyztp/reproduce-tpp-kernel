@@ -23,6 +23,7 @@
 #include <linux/freezer.h>
 #include <linux/pfn_t.h>
 #include <linux/mman.h>
+#include <linux/mempolicy.h>
 #include <linux/memremap.h>
 #include <linux/pagemap.h>
 #include <linux/debugfs.h>

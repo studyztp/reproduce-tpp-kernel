@@ -48,6 +48,7 @@ struct ctl_dir;
 #define SYSCTL_ONE_THOUSAND		((void *)&sysctl_vals[7])
 #define SYSCTL_THREE_THOUSAND		((void *)&sysctl_vals[8])
 #define SYSCTL_INT_MAX			((void *)&sysctl_vals[9])
+#define SYSCTL_TEN_THOUSAND		((void *)&sysctl_vals[11])
 
 /* this is needed for the proc_dointvec_minmax for [fs_]overflow UID and GID */
 #define SYSCTL_MAXOLDUID		((void *)&sysctl_vals[10])

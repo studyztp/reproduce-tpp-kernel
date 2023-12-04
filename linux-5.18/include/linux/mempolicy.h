@@ -142,6 +142,7 @@ extern void numa_default_policy(void);
 extern void numa_policy_init(void);
 extern void mpol_rebind_task(struct task_struct *tsk, const nodemask_t *new);
 extern void mpol_rebind_mm(struct mm_struct *mm, nodemask_t *new);
+extern void check_toptier_balanced(void);
 
 extern int huge_node(struct vm_area_struct *vma,
 				unsigned long addr, gfp_t gfp_flags,
@@ -183,6 +184,7 @@ extern bool vma_migratable(struct vm_area_struct *vma);
 
 extern int mpol_misplaced(struct page *, struct vm_area_struct *, unsigned long, int);
 extern void mpol_put_task_policy(struct task_struct *);
+extern bool numa_promotion_tiered_enabled;
 
 static inline bool mpol_is_preferred_many(struct mempolicy *pol)
 {
@@ -303,6 +305,12 @@ static inline bool mpol_is_preferred_many(struct mempolicy *pol)
 {
 	return  false;
 }
+
+static inline void check_toptier_balanced(void)
+{
+}
+
+#define numa_promotion_tiered_enabled	false
 
 #endif /* CONFIG_NUMA */
 #endif

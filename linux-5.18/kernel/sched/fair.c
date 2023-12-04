@@ -53,6 +53,7 @@
 #include "sched.h"
 #include "stats.h"
 #include "autogroup.h"
+#include <trace/events/sched.h>
 
 /*
  * Targeted preemption latency for CPU-bound tasks:
@@ -1419,6 +1420,13 @@ bool should_numa_migrate_memory(struct task_struct *p, struct page * page,
 
 	this_cpupid = cpu_pid_to_cpupid(dst_cpu, current->pid);
 	last_cpupid = page_cpupid_xchg_last(page, this_cpupid);
+	
+	/*
+	 * The pages in non-toptier memory node should be migrated
+	 * according to hot/cold instead of accessing CPU node.
+	 */
+	if (numa_promotion_tiered_enabled && !node_is_toptier(src_nid))
+		return true;
 
 	/*
 	 * Allow first faults or private faults to migrate immediately early in
@@ -11072,6 +11080,7 @@ void trigger_load_balance(struct rq *rq)
 		raise_softirq(SCHED_SOFTIRQ);
 
 	nohz_balancer_kick(rq);
+	check_toptier_balanced();
 }
 
 static void rq_online_fair(struct rq *rq)

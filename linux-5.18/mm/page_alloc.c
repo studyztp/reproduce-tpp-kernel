@@ -3756,7 +3756,8 @@ out:
 	if (test_bit(ZONE_BOOSTED_WATERMARK, &zone->flags)) {
 		clear_bit(ZONE_BOOSTED_WATERMARK, &zone->flags);
 		wakeup_kswapd(zone, 0, 0, zone_idx(zone));
-	}
+	} else if (!pgdat_toptier_balanced(zone->zone_pgdat, order, zone_idx(zone)))
+		wakeup_kswapd(zone, 0, 0, zone_idx(zone));
 
 	VM_BUG_ON_PAGE(page && bad_range(zone, page), page);
 	return page;
@@ -8561,6 +8562,22 @@ static void __setup_per_zone_wmarks(void)
 		zone->_watermark[WMARK_HIGH] = low_wmark_pages(zone) + tmp;
 		zone->_watermark[WMARK_PROMO] = high_wmark_pages(zone) + tmp;
 
+		if (numa_promotion_tiered_enabled) {
+			tmp = mult_frac(zone_managed_pages(zone), demote_scale_factor, 10000);
+
+			/*
+			 * Clamp demote watermark between twice high watermark
+			 * and max managed pages.
+			 */
+			if (tmp < 2 * zone->_watermark[WMARK_HIGH])
+				tmp = 2 * zone->_watermark[WMARK_HIGH];
+			if (tmp > zone_managed_pages(zone))
+				tmp = zone_managed_pages(zone);
+			zone->_watermark[WMARK_DEMOTE] = tmp;
+
+			zone->watermark_boost = 0;
+		}
+
 		spin_unlock_irqrestore(&zone->lock, flags);
 	}
 
@@ -8685,6 +8702,22 @@ int watermark_scale_factor_sysctl_handler(struct ctl_table *table, int write,
 
 	return 0;
 }
+
+int demote_scale_factor_sysctl_handler(struct ctl_table *table, int write,
+	void __user *buffer, size_t *length, loff_t *ppos)
+{
+	int rc;
+
+	rc = proc_dointvec_minmax(table, write, buffer, length, ppos);
+	if (rc)
+		return rc;
+
+	if (write)
+		setup_per_zone_wmarks();
+
+	return 0;
+}
+
 
 #ifdef CONFIG_NUMA
 static void setup_min_unmapped_ratio(void)

@@ -4345,6 +4345,26 @@ DEFINE_STATIC_KEY_FALSE(sched_numa_balancing);
 #ifdef CONFIG_NUMA_BALANCING
 
 int sysctl_numa_balancing_mode;
+bool numa_promotion_tiered_enabled;
+
+/*
+ * If there is only one toptier node available, pages on that
+ * node can not be promotrd to anywhere. In that case, downgrade
+ * to numa_promotion_tiered_enabled mode
+ */
+static void check_numa_promotion_mode(void)
+{
+	int node, toptier_node_count = 0;
+
+	for_each_online_node(node) {
+		if (node_is_toptier(node))
+			++toptier_node_count;
+	}
+	if (toptier_node_count == 1) {
+		numa_promotion_tiered_enabled = true;
+	}
+}
+
 
 static void __set_numabalancing_state(bool enabled)
 {
@@ -4358,6 +4378,7 @@ void set_numabalancing_state(bool enabled)
 {
 	if (enabled)
 		sysctl_numa_balancing_mode = NUMA_BALANCING_NORMAL;
+		numa_promotion_tiered_enabled = true;
 	else
 		sysctl_numa_balancing_mode = NUMA_BALANCING_DISABLED;
 	__set_numabalancing_state(enabled);
